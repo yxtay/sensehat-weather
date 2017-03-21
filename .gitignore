@@ -92,4 +92,4 @@ ENV/
 .idea/
 
 # credentials
-raspberry-pi-sensortag-*.json
+raspberry-pi-*.json

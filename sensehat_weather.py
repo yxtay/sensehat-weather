@@ -10,7 +10,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 # configurations to be set accordingly
-GDOCS_OAUTH_JSON = "raspberry-pi-sensortag-97386df66227.json"
+GDOCS_OAUTH_JSON = "raspberry-pi-0f26df464c6e.json"
 GDOCS_SPREADSHEET_NAME = "sensehat-weather"
 GDOCS_WORKSHEET_NAME = "data"
 FREQUENCY_SECONDS = 295
