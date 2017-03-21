@@ -11,22 +11,21 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # configurations to be set accordingly
 GDOCS_OAUTH_JSON = "raspberry-pi-sensortag-97386df66227.json"
-GDOCS_SPREADSHEET_NAME = "raspberry-pi-sensortag"
+GDOCS_SPREADSHEET_NAME = "sensehat-weather"
 GDOCS_WORKSHEET_NAME = "data"
-FREQUENCY_SECONDS = 299
+FREQUENCY_SECONDS = 295
 
 
 def get_readings(hat):
     """Get sensor readings and collate them in a dictionary."""
-    try:
-        readings = {}
-        readings["temperature"] = hat.temperature
-        readings["humidity"] = hat.humidity
-        readings["pressure"] = hat.pressure
+    readings = {}
+    readings["temperature"] = hat.temperature
+    readings["humidity"] = hat.humidity
+    readings["pressure"] = hat.pressure
 
-        # round to 2 decimal places for all readings
-        readings = {key: round(value, 2) for key, value in readings.items()}
-        return readings
+    # round to 2 decimal places for all readings
+    readings = {key: round(value, 2) for key, value in readings.items()}
+    return readings
 
 
 def login_open_sheet(oauth_key_file, spreadsheet_name, worksheet_name):
