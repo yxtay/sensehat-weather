@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import argparse
 import datetime
 import sys
 import time
@@ -63,6 +64,11 @@ def append_readings(worksheet, readings):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--cron", help="for cron job",
+                        action="store_true")
+    args = parser.parse_args()
+
     hat = SenseHat()
     hat.clear()
     worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
@@ -85,6 +91,8 @@ def main():
             worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
             continue
 
+        if args.cron:
+            break
         print()
         time.sleep(FREQUENCY_SECONDS)
 
