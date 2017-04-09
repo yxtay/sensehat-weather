@@ -1,9 +1,7 @@
 from __future__ import print_function
 
-import argparse
 import datetime
 import sys
-import time
 
 from sense_hat import SenseHat
 import gspread
@@ -14,7 +12,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 GDOCS_OAUTH_JSON = "raspberry-pi-0f26df464c6e.json"
 GDOCS_SPREADSHEET_NAME = "sensehat-weather"
 GDOCS_WORKSHEET_NAME = "data"
-FREQUENCY_SECONDS = 295
 
 
 def get_readings(hat):
@@ -64,37 +61,20 @@ def append_readings(worksheet, readings):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cron", help="for cron job",
-                        action="store_true")
-    args = parser.parse_args()
-
     hat = SenseHat()
     hat.clear()
+
+    # get sensor readings
+    readings = get_readings(hat)
     worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
+    append_readings(worksheet, readings)
 
-    print('Logging sensor measurements to {0} every {1} seconds.'.format(GDOCS_SPREADSHEET_NAME, FREQUENCY_SECONDS))
-    print('Press Ctrl-C to quit.')
-    while True:
-        # get sensor readings
-        readings = get_readings(hat)
-
-        # print readings
-        print("Time:\t{}".format(datetime.datetime.now()))
-        print("Temperature:\t{}".format(readings["temperature"]))
-        print("Humidty:\t{}".format(readings["humidity"]))
-        print("Pressure:\t{}".format(readings["pressure"]))
-
-        worksheet = append_readings(worksheet, readings)
-        # login if necessary.
-        if worksheet is None:
-            worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
-            continue
-
-        if args.cron:
-            break
-        print()
-        time.sleep(FREQUENCY_SECONDS)
+    # print readings
+    print("Time:\t{}".format(datetime.datetime.now()))
+    print("Temperature:\t{}".format(readings["temperature"]))
+    print("Humidty:\t{}".format(readings["humidity"]))
+    print("Pressure:\t{}".format(readings["pressure"]))
+    print()
 
 
 if __name__ == "__main__":
