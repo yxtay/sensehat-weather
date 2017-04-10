@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import datetime
 import sys
+import time
 
 from sense_hat import SenseHat
 import gspread
@@ -17,12 +18,15 @@ GDOCS_WORKSHEET_NAME = "data"
 def get_readings(hat):
     """Get sensor readings and collate them in a dictionary."""
     readings = {}
+    readings["datetime"] = datetime.datetime.now()
     readings["temperature"] = hat.temperature
     readings["humidity"] = hat.humidity
     readings["pressure"] = hat.pressure
 
     # round to 2 decimal places for all readings
-    readings = {key: round(value, 2) for key, value in readings.items()}
+    for key, value in readings.copy().items():
+        if key != "datetime":
+            readings[key] = round(value, 2)
     return readings
 
 
@@ -40,24 +44,22 @@ def login_open_sheet(oauth_key_file, spreadsheet_name, worksheet_name):
               'Check OAuth credentials, spreadsheet name, '
               'and make sure spreadsheet is shared to the '
               'client_email address in the OAuth .json file!')
-        print('Google sheet login failed with error:', e)
-        sys.exit(1)
+        print('Google sheet login failed with error.')
+        raise e
 
 
 def append_readings(worksheet, readings):
     """Append the data in the spreadsheet, including a timestamp."""
     try:
-        columns = ["temperature", "humidity", "pressure"]
-        worksheet.append_row([datetime.datetime.now()] + [readings.get(col, '') for col in columns])
+        columns = ["datetime", "temperature", "humidity", "pressure"]
+        worksheet.append_row([readings.get(col, '') for col in columns])
         print("Wrote a row to {0}".format(GDOCS_SPREADSHEET_NAME))
-        return worksheet
 
     except Exception as e:
         # Error appending data, most likely because credentials are stale.
         # Null out the worksheet so a login is performed.
         print("Append error, logging in again")
-        print(e)
-        return None
+        raise e
 
 
 def main():
@@ -66,14 +68,24 @@ def main():
 
     # get sensor readings
     readings = get_readings(hat)
-    worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
-    append_readings(worksheet, readings)
 
     # print readings
-    print("Time:\t{}".format(datetime.datetime.now()))
+    print("Time:\t{}".format(readings["datetime"]))
     print("Temperature:\t{}".format(readings["temperature"]))
     print("Humidty:\t{}".format(readings["humidity"]))
     print("Pressure:\t{}".format(readings["pressure"]))
+
+    # upload to google sheet
+    for _ in range(30):
+        try:
+            worksheet = login_open_sheet(GDOCS_OAUTH_JSON, GDOCS_SPREADSHEET_NAME, GDOCS_WORKSHEET_NAME)
+            append_readings(worksheet, readings)
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(60)
+            continue
+
     print()
 
 
