@@ -10,11 +10,11 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # logging
-handler = logging.handlers.RotatingFileHandler("logs/log", maxBytes=2 ** 20, backupCount=10)
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handler=handler)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+fh = logging.handlers.RotatingFileHandler("log", maxBytes=2 ** 20, backupCount=10)
+logger.addHandler(fh)
 
 # configurations to be set accordingly
 GDOCS_OAUTH_JSON = "raspberry-pi-0f26df464c6e.json"
@@ -44,7 +44,7 @@ def login_open_sheet(oauth_key_file, spreadsheet_name, worksheet_name):
     try:
         logger.debug("authenticating google account.")
         scope = ['https://spreadsheets.google.com/feeds']
-        credentials = ServiceAccountCredentials.from_cjson_keyfile_name(oauth_key_file, scope)
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(oauth_key_file, scope)
         gc = gspread.authorize(credentials)
         logger.debug("google account authorised.")
         worksheet = gc.open(spreadsheet_name).worksheet(worksheet_name)
