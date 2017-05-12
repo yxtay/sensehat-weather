@@ -2,20 +2,19 @@ from __future__ import print_function
 
 import datetime
 import logging
+import logging.handlers
 import time
 
 from sense_hat import SenseHat
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-
 # logging
+handler = logging.handlers.RotatingFileHandler("logs/log", maxBytes=2 ** 20, backupCount=10)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handler=handler)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger.setFormatter(format)
-logger.setLevel(logging.info)
-
 
 # configurations to be set accordingly
 GDOCS_OAUTH_JSON = "raspberry-pi-0f26df464c6e.json"
@@ -26,7 +25,7 @@ GDOCS_WORKSHEET_NAME = "data"
 def get_readings(hat):
     """Get sensor readings and collate them in a dictionary."""
     logger.debug("getting readings.")
-    readings = {}
+    readings = dict()
     readings["datetime"] = datetime.datetime.now()
     readings["temperature"] = hat.temperature
     readings["humidity"] = hat.humidity
@@ -72,7 +71,7 @@ def append_readings(worksheet, readings):
     except Exception as e:
         # Error appending data, most likely because credentials are stale.
         # Null out the worksheet so a login is performed.
-        logging.error("appending error. credentials are probable stale. "
+        logging.error("appending error. credentials are probably stale. "
                       "logging in again.",
                       exc_info=True)
         raise e
@@ -87,7 +86,7 @@ def main():
 
     # print readings
     logger.info("time: {}, temperature: {}, humidity: {}, pressue: {}"
-                .format(*readings[key] for key in ["datetime", "temperature", "humidity", "pressure"]))
+                .format(*[readings[key] for key in ["datetime", "temperature", "humidity", "pressure"]]))
 
     # upload to google sheet
     for _ in range(30):
