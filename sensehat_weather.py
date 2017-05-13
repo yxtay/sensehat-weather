@@ -9,17 +9,20 @@ from sense_hat import SenseHat
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-fh = logging.handlers.RotatingFileHandler("log", maxBytes=2 ** 20, backupCount=10)
-logger.addHandler(fh)
-
 # configurations to be set accordingly
 GDOCS_OAUTH_JSON = "raspberry-pi-0f26df464c6e.json"
 GDOCS_SPREADSHEET_NAME = "sensehat-weather"
 GDOCS_WORKSHEET_NAME = "data"
+LOG_FILE = "out.log"
+
+# logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+fh = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=2 ** 20, backupCount=2)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 def get_readings(hat):
@@ -52,11 +55,11 @@ def login_open_sheet(oauth_key_file, spreadsheet_name, worksheet_name):
         return worksheet
 
     except Exception as e:
-        logger.error("google sheet login failed. "
-                     "check OAuth credentials, spreadsheet name, "
-                     "and make sure spreadsheet is shared to the "
-                     "client_email address in the OAuth .json file!",
-                     exc_info=True)
+        logger.exception(e)
+        logger.warning("google sheet login failed. "
+                       "check OAuth credentials, spreadsheet name, sheet name"
+                       "and make sure spreadsheet is shared to the "
+                       "client_email address in the OAuth .json file!")
         raise e
 
 
@@ -71,15 +74,17 @@ def append_readings(worksheet, readings):
     except Exception as e:
         # Error appending data, most likely because credentials are stale.
         # Null out the worksheet so a login is performed.
-        logging.error("appending error. credentials are probably stale. "
-                      "logging in again.",
-                      exc_info=True)
+        logger.exception(e)
+        logging.warning("appending error. credentials are probably stale. "
+                        "logging in again.")
         raise e
 
 
 def main():
+    logger.debug("start of main function.")
     hat = SenseHat()
     hat.clear()
+    logger.debug("sense hat connected.")
 
     # get sensor readings
     readings = get_readings(hat)
@@ -95,9 +100,11 @@ def main():
             append_readings(worksheet, readings)
             break
         except Exception as e:
-            logger.error("error!", exc_info=True)
-            time.sleep(60)
+            logger.warning(e)
+            time.sleep(120)
             continue
+
+    logger.debug("end of main function.")
 
 
 if __name__ == "__main__":
