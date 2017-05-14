@@ -90,7 +90,7 @@ def main():
     readings = get_readings(hat)
 
     # print readings
-    logger.info("time: {}, temperature: {}, humidity: {}, pressue: {}"
+    logger.info("time: {}, temperature: {:.2f}, humidity: {:.2f}, pressure: {:.2f}"
                 .format(*[readings[key] for key in ["datetime", "temperature", "humidity", "pressure"]]))
 
     # upload to google sheet
