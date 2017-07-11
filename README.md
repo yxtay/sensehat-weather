@@ -8,7 +8,7 @@ on hackster.io and modified to run as a cron task.
 
 ## Setup
 
-```sh
+```bash
 # clone the repo
 git clone https://github.com/yxtay/sensehat-weather.git && cd sensehat-weather
 
@@ -24,7 +24,7 @@ http://gspread.readthedocs.io/en/latest/oauth2.html
 
 Download the credentials json file and copy it into the project directory in your Raspberry Pi.
 
-```sh
+```bash
 # assuming credentials file is in the current directory
 scp credentials.json pi@192.168.1.5:sensehat-weather/
 ```
@@ -39,26 +39,46 @@ Open up the credentials json file in the previous step
 and note the email address under the `client_email` field. 
 Share the spreadsheet with that email address.
 
-## Configure variables
-
-Set the variables at the top of `sensehat-weather.py` file accordingly.
-They are pretty self-explanatory.
-
 ## Schedule cron task
 
 Open crontab in the Raspberry Pi.
 
-```sh
+```bash
 crontab -e
 ```
 
 Copy the following line into crontab.
 This schedules the task to run every 5 mins.
 
-```sh
+```bash
 */5 * * * * cd $HOME/sensehat-weather && python sensehat_weather.py
+```
+
+Use optional arguments if your configurations is different from defaults.
+
+- oauth_json: `credentials.json`
+- spreadsheet: `sensehat-weather`
+- worksheet: `data`
+- log: `main.log`
+
+```
+usage: sensehat_weather.py [-h] [--oauth-json OAUTH_JSON]
+                           [--spreadsheet SPREADSHEET] [--worksheet WORKSHEET]
+                           [--log LOG]
+
+Take readings from SenseHat and add to Google Spreadsheet.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --oauth-json OAUTH_JSON
+                        path to Google OAuth credentials json file
+  --spreadsheet SPREADSHEET
+                        name of Google Spreadsheet to save SenseHat readings
+  --worksheet WORKSHEET
+                        name of worksheet to save SenseHat readings
+  --log LOG             path of log file
 ```
 
 ## Logs
 
-Logs are written into the `LOG_FILE` specified in `sensehat-weather.py`. By default the file is `out.log` in the project directory.
+By default logs are written to `main.log` in the project directory.
