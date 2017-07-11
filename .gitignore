@@ -91,5 +91,6 @@ ENV/
 # IDE
 .idea/
 
-# credentials
-raspberry-pi-*.json
+# project
+credentials.json
+main.log*
