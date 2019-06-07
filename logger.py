@@ -1,24 +1,23 @@
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
-from os import path
 
 
-def get_logger(name, log_path=path.join(path.dirname(__file__), "main.log"), console=False):
+def get_logger(name, log_path="main.log", console=True):
     """
     Simple logging wrapper that returns logger
     configured to log into file and console.
-
     Args:
         name (str): name of logger
         log_path (str): path of log file
         console (bool): whether to log on console
-
     Returns:
-        logging.Logger: configured logger
+        logger (logging.Logger): configured logger
     """
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s"
+    formatter = logging.Formatter(format)
 
     # ensure that logging handlers are not duplicated
     for handler in list(logger.handlers):
@@ -26,18 +25,30 @@ def get_logger(name, log_path=path.join(path.dirname(__file__), "main.log"), con
 
     # rotating file handler
     if log_path:
-        fh = RotatingFileHandler(log_path,
-                                 maxBytes=2 ** 20,  # 1 MB
-                                 backupCount=1)  # 1 backup
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
+        file_handler = RotatingFileHandler(
+            log_path,
+            maxBytes=2 ** 20,  # 1 MB
+            backupCount=1,  # 1 backup
+        )
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     # console handler
     if console:
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+        # stdout
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.INFO)
+        stdout_handler.setFormatter(formatter)
+        logger.addHandler(stdout_handler)
+
+        # stderr
+        stderr_handler = logging.StreamHandler(sys.stderr)
+        stderr_handler.setLevel(logging.ERROR)
+        stderr_handler.setFormatter(formatter)
+        logger.addHandler(stderr_handler)
+
+    if len(logger.handlers) == 0:
+        logger.addHandler(logging.NullHandler())
 
     return logger

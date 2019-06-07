@@ -54,15 +54,12 @@ This schedules the task to run every 5 mins.
 */5 * * * * cd $HOME/sensehat-weather && python sensehat_weather.py
 ```
 
-Use optional arguments if your configurations is different from defaults.
+## Usage
 
-- oauth_json: `credentials.json`
-- spreadsheet: `sensehat-weather`
-- worksheet: `data`
-- log: `main.log`
+Use optional arguments if your configurations are different from defaults.
 
 ```
-usage: sensehat_weather.py [-h] [--oauth-json OAUTH_JSON]
+usage: sensehat_weather.py [-h] [--credentials-json CREDENTIALS_JSON]
                            [--spreadsheet SPREADSHEET] [--worksheet WORKSHEET]
                            [--log LOG]
 
@@ -70,13 +67,13 @@ Take readings from SenseHat and add to Google Spreadsheet.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --oauth-json OAUTH_JSON
-                        path to Google OAuth credentials json file
+  --credentials-json CREDENTIALS_JSON
+                        path to Google OAuth credentials json file (default: credentials.json)
   --spreadsheet SPREADSHEET
-                        name of Google Spreadsheet to save SenseHat readings
+                        name of Google Spreadsheet to save SenseHat readings (default: sensehat-weather)
   --worksheet WORKSHEET
-                        name of worksheet to save SenseHat readings
-  --log LOG             path of log file
+                        name of worksheet to save SenseHat readings (default: data)
+  --log LOG             path of log file (default: main.log)
 ```
 
 ## Logs
