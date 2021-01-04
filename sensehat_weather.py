@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from datetime import datetime, timedelta
 
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 from sense_hat import SenseHat
 
 from logger import get_logger
@@ -48,13 +47,8 @@ def convert_sheets_datetime(dt):
 def login_open_sheet(credentials_json, spreadsheet_name, worksheet_name):
     """Connect to Google Docs spreadsheet and return the first worksheet."""
     try:
-        # load credentials
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_json, scope)
-        logger.debug("credentials loaded: %s.", credentials_json)
-
-        # authorise google sheets
-        gc = gspread.authorize(credentials)
+        # connect google account
+        gc = gspread.service_account(filename=credentials_json)
         logger.debug("google account authorised.")
 
         # get worksheet
